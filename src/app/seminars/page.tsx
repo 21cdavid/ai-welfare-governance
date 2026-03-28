@@ -2,13 +2,16 @@ import Link from 'next/link'
 
 async function getSeminars() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/seminars?order=start_at.asc`, {
-      headers: {
-        apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!}`,
-      },
-      cache: 'no-store',
-    })
+    const res = await fetch(
+      process.env.NEXT_PUBLIC_SUPABASE_URL + '/rest/v1/seminars?order=start_at.asc',
+      {
+        headers: {
+          apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+          Authorization: 'Bearer ' + process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        },
+        cache: 'no-store',
+      }
+    )
     return await res.json()
   } catch {
     return []
@@ -44,7 +47,7 @@ export default async function SeminarsPage() {
         <div className="flex flex-col gap-4">
           {seminars.map((s: any) => (
             <div key={s.id} className="bg-white rounded-2xl border border-gray-100 p-6">
-              <div className="flex items-start justify-between mb-3">
+              <div className="mb-3">
                 <span className={`text-xs font-medium px-2 py-1 rounded-md ${statusColor[s.status] || 'bg-gray-100 text-gray-500'}`}>
                   {statusLabel[s.status] || s.status}
                 </span>
@@ -58,7 +61,7 @@ export default async function SeminarsPage() {
               {s.description && <p className="text-sm text-gray-400 mb-4">{s.description}</p>}
               <div className="flex gap-2 mt-4">
                 {s.status !== 'closed' ? (
-                  <Link href={`/seminars/${s.id}/register`}
+                  <Link href={'/seminars/' + s.id + '/register'}
                     className="bg-blue-700 text-white text-sm px-4 py-2 rounded-xl hover:bg-blue-800">
                     참석 신청
                   </Link>
