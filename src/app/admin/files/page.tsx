@@ -11,12 +11,17 @@ const typeColor: Record<string, string> = {
 
 export default function AdminFilesPage() {
   const [files, setFiles] = useState<any[]>([])
+  const [seminars, setSeminars] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
   const [message, setMessage] = useState('')
   const [fileType, setFileType] = useState('발표자료')
+  const [seminarId, setSeminarId] = useState('')
 
-  useEffect(() => { fetchFiles() }, [])
+  useEffect(() => {
+    fetchFiles()
+    fetchSeminars()
+  }, [])
 
   const fetchFiles = async () => {
     setLoading(true)
@@ -24,6 +29,12 @@ export default function AdminFilesPage() {
     const data = await res.json()
     setFiles(Array.isArray(data) ? data : [])
     setLoading(false)
+  }
+
+  const fetchSeminars = async () => {
+    const res = await fetch('/api/seminars')
+    const data = await res.json()
+    setSeminars(Array.isArray(data) ? data : [])
   }
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,6 +45,7 @@ export default function AdminFilesPage() {
     const fd = new FormData()
     fd.append('file', file)
     fd.append('file_type', fileType)
+    if (seminarId) fd.append('seminar_id', seminarId)
     try {
       const res = await fetch('/api/files', { method: 'POST', body: fd })
       const data = await res.json()
@@ -68,6 +80,11 @@ export default function AdminFilesPage() {
     fetchFiles()
   }
 
+  const getSeminarTitle = (id: string) => {
+    const s = seminars.find(s => s.id === id)
+    return s ? s.title.substring(0, 20) + '...' : '-'
+  }
+
   return (
     <main className="min-h-screen bg-gray-50">
       <nav className="bg-white border-b px-6 py-4 flex items-center justify-between">
@@ -92,7 +109,22 @@ export default function AdminFilesPage() {
 
         <div className="bg-white rounded-2xl border p-6 mb-6">
           <h2 className="text-sm font-medium mb-4">파일 업로드</h2>
-          <div className="flex items-center gap-4 flex-wrap">
+          <div className="flex items-end gap-4 flex-wrap">
+            <div>
+              <label className="text-xs text-gray-500 block mb-1">세미나 선택</label>
+              <select
+                value={seminarId}
+                onChange={e => setSeminarId(e.target.value)}
+                className="border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-400 min-w-48"
+              >
+                <option value="">세미나 선택 (선택사항)</option>
+                {seminars.map(s => (
+                  <option key={s.id} value={s.id}>
+                    {s.title.length > 20 ? s.title.substring(0, 20) + '...' : s.title}
+                  </option>
+                ))}
+              </select>
+            </div>
             <div>
               <label className="text-xs text-gray-500 block mb-1">파일 유형</label>
               <select
@@ -133,15 +165,16 @@ export default function AdminFilesPage() {
               <tr>
                 <th className="text-left px-4 py-3 text-xs text-gray-500 font-medium">파일명</th>
                 <th className="text-left px-4 py-3 text-xs text-gray-500 font-medium">유형</th>
+                <th className="text-left px-4 py-3 text-xs text-gray-500 font-medium">연결 세미나</th>
                 <th className="text-left px-4 py-3 text-xs text-gray-500 font-medium">업로드일</th>
                 <th className="text-left px-4 py-3 text-xs text-gray-500 font-medium">관리</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={4} className="text-center py-10 text-sm text-gray-400">불러오는 중...</td></tr>
+                <tr><td colSpan={5} className="text-center py-10 text-sm text-gray-400">불러오는 중...</td></tr>
               ) : files.length === 0 ? (
-                <tr><td colSpan={4} className="text-center py-10 text-sm text-gray-400">업로드된 파일이 없습니다.</td></tr>
+                <tr><td colSpan={5} className="text-center py-10 text-sm text-gray-400">업로드된 파일이 없습니다.</td></tr>
               ) : files.map(f => (
                 <tr key={f.id} className="border-b border-gray-50 hover:bg-gray-50">
                   <td className="px-4 py-3">
@@ -152,6 +185,9 @@ export default function AdminFilesPage() {
                   </td>
                   <td className="px-4 py-3">
                     <span className={`text-xs px-2 py-0.5 rounded-md font-medium ${typeColor[f.file_type] || 'bg-gray-100 text-gray-600'}`}>{f.file_type}</span>
+                  </td>
+                  <td className="px-4 py-3 text-xs text-gray-500">
+                    {f.seminar_id ? getSeminarTitle(f.seminar_id) : '-'}
                   </td>
                   <td className="px-4 py-3 text-xs text-gray-400">
                     {new Date(f.uploaded_at).toLocaleDateString('ko-KR')}

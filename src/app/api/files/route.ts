@@ -9,16 +9,14 @@ const supabase = createClient(
 function sanitizeFileName(name: string): string {
   const ext = name.split('.').pop() || ''
   const base = name.replace(/\.[^.]+$/, '')
-  const sanitized = base
-    .replace(/[^a-zA-Z0-9가-힣]/g, '_')
-    .replace(/_+/g, '_')
-    .substring(0, 50)
+  const sanitized = base.replace(/[^a-zA-Z0-9가-힣]/g, '_').replace(/_+/g, '_').substring(0, 50)
   return sanitized + '.' + ext
 }
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const filePath = searchParams.get('path')
+  const seminarId = searchParams.get('seminar_id')
 
   if (filePath) {
     const { data, error } = await supabase.storage
@@ -28,10 +26,10 @@ export async function GET(req: Request) {
     return NextResponse.json({ url: data.signedUrl })
   }
 
-  const { data, error } = await supabase
-    .from('seminar_files')
-    .select('*')
-    .order('uploaded_at', { ascending: false })
+  let query = supabase.from('seminar_files').select('*').order('uploaded_at', { ascending: false })
+  if (seminarId) query = query.eq('seminar_id', seminarId)
+
+  const { data, error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json(data)
 }
@@ -41,13 +39,13 @@ export async function POST(req: Request) {
     const formData = await req.formData()
     const file = formData.get('file') as File
     const fileType = formData.get('file_type') as string
+    const seminarId = formData.get('seminar_id') as string
 
     if (!file) return NextResponse.json({ error: '파일이 없습니다.' }, { status: 400 })
 
     const safeFileName = sanitizeFileName(file.name)
-    const filePath = 'general/' + Date.now() + '_' + safeFileName
-
-    console.log('업로드 파일:', file.name, '->', filePath)
+    const folder = seminarId ? seminarId : 'general'
+    const filePath = folder + '/' + Date.now() + '_' + safeFileName
 
     const arrayBuffer = await file.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
@@ -59,15 +57,12 @@ export async function POST(req: Request) {
         upsert: false
       })
 
-    if (uploadError) {
-      console.error('업로드 오류:', uploadError)
-      return NextResponse.json({ error: uploadError.message }, { status: 400 })
-    }
+    if (uploadError) return NextResponse.json({ error: uploadError.message }, { status: 400 })
 
     const { data, error } = await supabase
       .from('seminar_files')
       .insert({
-        seminar_id: null,
+        seminar_id: seminarId || null,
         file_name: file.name,
         file_path: filePath,
         file_type: fileType || '기타',
@@ -78,7 +73,6 @@ export async function POST(req: Request) {
     if (error) return NextResponse.json({ error: error.message }, { status: 400 })
     return NextResponse.json(data)
   } catch (e: any) {
-    console.error('예외:', e)
     return NextResponse.json({ error: e.message }, { status: 500 })
   }
 }
