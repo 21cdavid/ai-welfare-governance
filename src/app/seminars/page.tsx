@@ -92,7 +92,7 @@ export default async function SeminarsPage() {
                       <div key={f.id} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
                         <span className="text-xs text-gray-600">📄 {f.file_name}</span>
                         
-                          href={'/api/download?path=' + encodeURIComponent(f.file_path)}
+                          href={`/api/download?path=${f.file_path}`}
                           className="text-xs text-blue-700 hover:underline"
                           target="_blank"
                           rel="noreferrer"
