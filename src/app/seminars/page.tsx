@@ -6,8 +6,8 @@ async function getSeminars() {
       process.env.NEXT_PUBLIC_SUPABASE_URL + '/rest/v1/seminars?order=start_at.asc',
       {
         headers: {
-          apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-          Authorization: 'Bearer ' + process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+          apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+          Authorization: 'Bearer ' + process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
         },
         cache: 'no-store',
       }
@@ -18,14 +18,14 @@ async function getSeminars() {
   }
 }
 
-async function getSeminarFiles(seminarId: string) {
+async function getSeminarFiles(seminarId) {
   try {
     const res = await fetch(
       process.env.NEXT_PUBLIC_SUPABASE_URL + '/rest/v1/seminar_files?seminar_id=eq.' + seminarId,
       {
         headers: {
-          apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-          Authorization: 'Bearer ' + process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+          apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+          Authorization: 'Bearer ' + process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
         },
         cache: 'no-store',
       }
@@ -36,8 +36,8 @@ async function getSeminarFiles(seminarId: string) {
   }
 }
 
-const statusLabel: Record<string, string> = { open: '접수 중', upcoming: '예정', closed: '종료' }
-const statusColor: Record<string, string> = {
+const statusLabel = { open: '접수 중', upcoming: '예정', closed: '종료' }
+const statusColor = {
   open: 'bg-green-100 text-green-700',
   upcoming: 'bg-blue-100 text-blue-700',
   closed: 'bg-gray-100 text-gray-500',
@@ -46,7 +46,7 @@ const statusColor: Record<string, string> = {
 export default async function SeminarsPage() {
   const seminars = await getSeminars()
   const seminarsWithFiles = await Promise.all(
-    seminars.map(async (s: any) => ({
+    seminars.map(async (s) => ({
       ...s,
       files: await getSeminarFiles(s.id)
     }))
@@ -69,10 +69,10 @@ export default async function SeminarsPage() {
         </div>
 
         <div className="flex flex-col gap-4">
-          {seminarsWithFiles.map((s: any) => (
+          {seminarsWithFiles.map((s) => (
             <div key={s.id} className="bg-white rounded-2xl border border-gray-100 p-6">
               <div className="mb-3">
-                <span className={`text-xs font-medium px-2 py-1 rounded-md ${statusColor[s.status] || 'bg-gray-100 text-gray-500'}`}>
+                <span className={statusColor[s.status] + ' text-xs font-medium px-2 py-1 rounded-md'}>
                   {statusLabel[s.status] || s.status}
                 </span>
               </div>
@@ -88,13 +88,14 @@ export default async function SeminarsPage() {
                 <div className="border-t pt-4 mb-4">
                   <p className="text-xs text-gray-500 font-medium mb-2">📎 첨부 자료 ({s.files.length}건)</p>
                   <div className="flex flex-col gap-1">
-                    {s.files.map((f: any) => (
+                    {s.files.map((f) => (
                       <div key={f.id} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
                         <span className="text-xs text-gray-600">📄 {f.file_name}</span>
                         
                           href={'/api/download?path=' + encodeURIComponent(f.file_path)}
                           className="text-xs text-blue-700 hover:underline"
                           target="_blank"
+                          rel="noreferrer"
                         >
                           다운로드
                         </a>
@@ -106,8 +107,10 @@ export default async function SeminarsPage() {
 
               <div className="flex gap-2 mt-2">
                 {s.status !== 'closed' ? (
-                  <Link href={'/seminars/' + s.id + '/register'}
-                    className="bg-blue-700 text-white text-sm px-4 py-2 rounded-xl hover:bg-blue-800">
+                  <Link
+                    href={'/seminars/' + s.id + '/register'}
+                    className="bg-blue-700 text-white text-sm px-4 py-2 rounded-xl hover:bg-blue-800"
+                  >
                     참석 신청
                   </Link>
                 ) : (
