@@ -176,7 +176,7 @@ export default function AdminSeminarsPage() {
                 >
                   참석자 목록 {showRegistrations === s.id ? '▲' : '▼'}
                 </button>
-                <ExcelButton id={s.id} title={s.title} />
+                <DownloadBtn seminarId={s.id} seminarTitle={s.title} />
                 <Link href="/admin/files" className="text-xs px-3 py-1.5 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">
                   파일 관리
                 </Link>
@@ -296,15 +296,17 @@ export default function AdminSeminarsPage() {
   )
 }
 
-function ExcelButton({ id, title }: { id: string; title: string }) {
-  const url = '/api/export?seminar_id=' + id + '&title=' + encodeURIComponent(title)
+function DownloadBtn({ seminarId, seminarTitle }: { seminarId: string; seminarTitle: string }) {
+  const handleClick = () => {
+    const params = new URLSearchParams({ seminar_id: seminarId, title: seminarTitle })
+    window.location.href = '/api/export?' + params.toString()
+  }
   return (
-    
-      href={url}
+    <button
+      onClick={handleClick}
       className="text-xs px-3 py-1.5 border border-green-200 text-green-700 rounded-lg hover:bg-green-50"
-      download
     >
       엑셀 다운로드
-    </a>
+    </button>
   )
 }
