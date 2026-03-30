@@ -7,16 +7,10 @@ const supabase = createClient(
 )
 
 function sanitizeFileName(name: string): string {
-  const ext = name.split('.').pop() || 'bin'
-  const base = name.replace(/\.[^.]+$/, '')
-  const sanitized = base
-    .replace(/[\(\)\[\]\{\}]/g, '')
-    .replace(/[^a-zA-Z0-9가-힣\-]/g, '_')
-    .replace(/_+/g, '_')
-    .replace(/^_|_$/g, '')
-    .substring(0, 50)
-  const safe = sanitized || 'file'
-  return safe + '.' + ext.toLowerCase()
+  const ext = (name.split('.').pop() || 'bin').toLowerCase()
+  const allowed = ['pdf','pptx','ppt','docx','doc','xlsx','xls','hwp','hwpx','zip','png','jpg','jpeg']
+  const safeExt = allowed.includes(ext) ? ext : 'bin'
+  return 'file_' + Date.now() + '.' + safeExt
 }
 
 export async function GET(req: Request) {
