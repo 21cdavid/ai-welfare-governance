@@ -13,13 +13,14 @@ export default function AdminSeminarsPage() {
   const [seminars, setSeminars] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
+  const [editTarget, setEditTarget] = useState<any>(null)
   const [showRegistrations, setShowRegistrations] = useState<string|null>(null)
   const [registrations, setRegistrations] = useState<any[]>([])
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
   const [form, setForm] = useState({
     title: '', start_date: '', start_time: '14:00',
-    venue: '', organizer: '', capacity: '50', description: ''
+    venue: '', organizer: '', capacity: '50', description: '', status: 'upcoming'
   })
 
   useEffect(() => { fetchSeminars() }, [])
@@ -38,46 +39,66 @@ export default function AdminSeminarsPage() {
     setRegistrations(Array.isArray(data) ? data : [])
   }
 
-  const handleAdd = async () => {
+  const openNew = () => {
+    setEditTarget(null)
+    setForm({ title: '', start_date: '', start_time: '14:00', venue: '', organizer: '', capacity: '50', description: '', status: 'upcoming' })
+    setShowForm(true)
+  }
+
+  const openEdit = (s: any) => {
+    const dt = new Date(s.start_at)
+    const date = dt.toISOString().slice(0, 10)
+    const time = dt.toTimeString().slice(0, 5)
+    setEditTarget(s)
+    setForm({
+      title: s.title || '',
+      start_date: date,
+      start_time: time,
+      venue: s.venue || '',
+      organizer: s.organizer || '',
+      capacity: String(s.capacity || 50),
+      description: s.description || '',
+      status: s.status || 'upcoming',
+    })
+    setShowForm(true)
+  }
+
+  const handleSave = async () => {
     if (!form.title || !form.start_date || !form.venue) {
       alert('제목, 날짜, 장소는 필수입니다.')
       return
     }
     setSaving(true)
     const startAt = new Date(form.start_date + 'T' + form.start_time + ':00+09:00').toISOString()
-    const res = await fetch('/api/seminars', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        title: form.title,
-        start_at: startAt,
-        venue: form.venue,
-        organizer: form.organizer,
-        capacity: Number(form.capacity),
-        description: form.description,
-        status: 'upcoming',
+    const body = {
+      title: form.title,
+      start_at: startAt,
+      venue: form.venue,
+      organizer: form.organizer,
+      capacity: Number(form.capacity),
+      description: form.description,
+      status: form.status,
+    }
+
+    if (editTarget) {
+      const res = await fetch('/api/seminars/' + editTarget.id, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
       })
-    })
-    if (res.ok) {
-      setMessage('세미나가 등록되었습니다.')
-      setForm({ title: '', start_date: '', start_time: '14:00', venue: '', organizer: '', capacity: '50', description: '' })
-      setShowForm(false)
-      fetchSeminars()
+      setMessage(res.ok ? '수정되었습니다.' : '수정 실패.')
     } else {
-      const data = await res.json()
-      setMessage('등록 실패: ' + (data.error || ''))
+      const res = await fetch('/api/seminars', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      })
+      setMessage(res.ok ? '등록되었습니다.' : '등록 실패.')
     }
     setSaving(false)
-    setTimeout(() => setMessage(''), 3000)
-  }
-
-  const handleStatus = async (id: string, status: string) => {
-    await fetch('/api/seminars/' + id, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status })
-    })
+    setShowForm(false)
     fetchSeminars()
+    setTimeout(() => setMessage(''), 3000)
   }
 
   const handleDelete = async (id: string) => {
@@ -112,11 +133,11 @@ export default function AdminSeminarsPage() {
       <div className="max-w-5xl mx-auto px-6 py-10">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-xl font-medium">세미나 관리</h1>
-          <button onClick={() => setShowForm(true)} className="bg-blue-700 text-white text-sm px-4 py-2 rounded-xl hover:bg-blue-800">+ 세미나 등록</button>
+          <button onClick={openNew} className="bg-blue-700 text-white text-sm px-4 py-2 rounded-xl hover:bg-blue-800">+ 세미나 등록</button>
         </div>
 
         {message && (
-          <div className={`text-sm px-4 py-3 rounded-xl mb-4 ${message.includes('등록') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
+          <div className={`text-sm px-4 py-3 rounded-xl mb-4 ${message.includes('실패') ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-700'}`}>
             {message}
           </div>
         )}
@@ -139,17 +160,10 @@ export default function AdminSeminarsPage() {
                     📍 {s.venue} &nbsp;|&nbsp;
                     👤 {s.organizer}
                   </p>
+                  {s.description && <p className="text-xs text-gray-400 mt-1">{s.description}</p>}
                 </div>
                 <div className="flex gap-2 ml-4 flex-shrink-0">
-                  <select
-                    value={s.status}
-                    onChange={e => handleStatus(s.id, e.target.value)}
-                    className="text-xs border border-gray-200 rounded-lg px-2 py-1 focus:outline-none"
-                  >
-                    <option value="upcoming">예정</option>
-                    <option value="open">접수 중</option>
-                    <option value="closed">종료</option>
-                  </select>
+                  <button onClick={() => openEdit(s)} className="text-xs px-3 py-1.5 border border-blue-200 text-blue-700 rounded-lg hover:bg-blue-50">수정</button>
                   <button onClick={() => handleDelete(s.id)} className="text-xs px-3 py-1 border text-red-400 rounded-lg hover:bg-red-50">삭제</button>
                 </div>
               </div>
@@ -162,6 +176,9 @@ export default function AdminSeminarsPage() {
                 >
                   참석자 목록 {showRegistrations === s.id ? '▲' : '▼'}
                 </button>
+                <Link href="/admin/files" className="text-xs px-3 py-1.5 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">
+                  파일 관리
+                </Link>
               </div>
 
               {showRegistrations === s.id && (
@@ -209,7 +226,7 @@ export default function AdminSeminarsPage() {
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 px-4">
           <div className="bg-white rounded-2xl p-6 w-full max-w-md max-h-screen overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-medium">새 세미나 등록</h2>
+              <h2 className="text-base font-medium">{editTarget ? '세미나 수정' : '새 세미나 등록'}</h2>
               <button onClick={() => setShowForm(false)} className="text-gray-400 text-lg">✕</button>
             </div>
             <div className="flex flex-col gap-3">
@@ -252,14 +269,23 @@ export default function AdminSeminarsPage() {
                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-400" />
               </div>
               <div>
+                <label className="text-xs text-gray-500 block mb-1">상태</label>
+                <select value={form.status} onChange={e => setForm({...form, status: e.target.value})}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-400">
+                  <option value="upcoming">예정</option>
+                  <option value="open">접수 중</option>
+                  <option value="closed">종료</option>
+                </select>
+              </div>
+              <div>
                 <label className="text-xs text-gray-500 block mb-1">세미나 소개</label>
                 <textarea placeholder="세미나 목적 및 주요 내용" rows={3}
                   value={form.description} onChange={e => setForm({...form, description: e.target.value})}
                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-400 resize-none" />
               </div>
-              <button onClick={handleAdd} disabled={saving}
+              <button onClick={handleSave} disabled={saving}
                 className="w-full bg-blue-700 text-white py-3 rounded-xl text-sm font-medium hover:bg-blue-800 disabled:opacity-50 mt-1">
-                {saving ? '등록 중...' : '등록 완료'}
+                {saving ? '저장 중...' : (editTarget ? '수정 완료' : '등록 완료')}
               </button>
             </div>
           </div>
