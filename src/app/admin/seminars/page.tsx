@@ -176,6 +176,13 @@ export default function AdminSeminarsPage() {
                 >
                   참석자 목록 {showRegistrations === s.id ? '▲' : '▼'}
                 </button>
+                
+                  href={'/api/export?seminar_id=' + s.id + '&title=' + encodeURIComponent(s.title)}
+                  className="text-xs px-3 py-1.5 border border-green-200 text-green-700 rounded-lg hover:bg-green-50"
+                  download
+                >
+                  엑셀 다운로드
+                </a>
                 <Link href="/admin/files" className="text-xs px-3 py-1.5 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50">
                   파일 관리
                 </Link>
