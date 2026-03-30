@@ -57,7 +57,7 @@ export default function RegisterPage() {
             <span className="text-green-600 text-2xl">✓</span>
           </div>
           <h2 className="text-lg font-medium mb-2">신청이 완료되었습니다</h2>
-          <p className="text-sm text-gray-500 mb-6">{form.email} 으로 확인 이메일이 발송됩니다.</p>
+          <p className="text-sm text-gray-500 mb-6">참석 신청이 정상적으로 접수되었습니다.</p>
           <Link href="/seminars" className="bg-blue-700 text-white text-sm px-6 py-2.5 rounded-xl hover:bg-blue-800">
             세미나 목록으로
           </Link>
