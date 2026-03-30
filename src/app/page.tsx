@@ -19,22 +19,24 @@ export default function Home() {
           <Link href="/seminars" className="flex-1 bg-blue-700 text-white text-center py-3 rounded-xl text-sm">세미나 바로가기</Link>
           <Link href="/experts" className="flex-1 bg-white border text-gray-700 text-center py-3 rounded-xl text-sm">전문가 풀 바로가기</Link>
         </div>
-        
-          href="https://www.youtube.com/@%EB%B3%B5%EC%A7%80%ED%8A%9C%EB%B8%8C/search?query=30%EC%B4%88+%EC%A0%95%EC%B1%85%EC%97%B0%EA%B5%AC"
-          target="_blank"
-          rel="noreferrer"
-          className="flex items-center gap-4 bg-white border border-red-100 rounded-2xl p-5 hover:border-red-300 transition-all"
-        >
-          <div className="w-12 h-12 bg-red-600 rounded-xl flex items-center justify-center flex-shrink-0 text-white text-xl font-bold">
-            ▶
-          </div>
-          <div className="flex-1">
-            <p className="text-sm font-medium text-gray-900">[30초 정책연구] 숏츠</p>
-            <p className="text-xs text-gray-500 mt-0.5">경기복지재단 복지튜브 · 30초로 보는 복지 정책 연구</p>
-          </div>
-          <span className="text-xs text-red-600 font-medium">바로가기</span>
-        </a>
+        <YoutubeBanner />
       </div>
     </main>
+  )
+}
+
+function YoutubeBanner() {
+  const url = "https://www.youtube.com/@%EB%B3%B5%EC%A7%80%ED%8A%9C%EB%B8%8C/search?query=30%EC%B4%88+%EC%A0%95%EC%B1%85%EC%97%B0%EA%B5%AC"
+  return (
+    <a href={url} target="_blank" rel="noreferrer" className="flex items-center gap-4 bg-white border border-red-100 rounded-2xl p-5">
+      <div className="w-12 h-12 bg-red-600 rounded-xl flex items-center justify-center flex-shrink-0 text-white font-bold text-lg">
+        yt
+      </div>
+      <div className="flex-1">
+        <p className="text-sm font-medium text-gray-900">[30초 정책연구] 숏츠</p>
+        <p className="text-xs text-gray-500 mt-0.5">경기복지재단 복지튜브 · 30초로 보는 복지 정책 연구</p>
+      </div>
+      <span className="text-xs text-red-600 font-medium">바로가기</span>
+    </a>
   )
 }
