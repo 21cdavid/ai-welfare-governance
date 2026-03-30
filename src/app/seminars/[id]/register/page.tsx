@@ -1,14 +1,26 @@
 'use client'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useParams } from 'next/navigation'
 
 export default function RegisterPage() {
+  const params = useParams()
+  const seminarId = params.id as string
+  const [seminar, setSeminar] = useState<any>(null)
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [form, setForm] = useState({
-    name: '', organization: '', position: '', email: '', phone: '', notify_method: 'email', purpose: ''
+    name: '', organization: '', position: '', email: '', phone: '', notify_method: 'email'
   })
+
+  useEffect(() => {
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL + '/rest/v1/seminars?id=eq.' + seminarId
+    fetch(url, { headers: { apikey: key || '', Authorization: 'Bearer ' + key } })
+    .then(r => r.json())
+    .then(data => { if (data && data[0]) setSeminar(data[0]) })
+  }, [seminarId])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -19,7 +31,7 @@ export default function RegisterPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          seminar_id: null,
+          seminar_id: seminarId,
           name: form.name,
           organization: form.organization,
           position: form.position,
@@ -60,14 +72,20 @@ export default function RegisterPage() {
         <Link href="/" className="font-medium text-blue-700">AI 복지 거버넌스</Link>
         <Link href="/seminars" className="text-sm text-gray-600 hover:text-blue-700">← 세미나 목록</Link>
       </nav>
-
       <div className="max-w-xl mx-auto px-6 py-10">
-        <div className="bg-blue-50 rounded-2xl p-5 mb-6 border border-blue-100">
-          <p className="text-xs text-blue-600 font-medium mb-1">신청 세미나</p>
-          <p className="text-sm font-medium text-blue-900">AI 기반 사회보장 급여 적정성 평가 방법론 세미나</p>
-          <p className="text-xs text-blue-600 mt-1">📅 2026. 04. 15 (화) 14:00–17:00 | 📍 경기복지재단 대회의실</p>
-        </div>
-
+        {seminar ? (
+          <div className="bg-blue-50 rounded-2xl p-5 mb-6 border border-blue-100">
+            <p className="text-xs text-blue-600 font-medium mb-1">신청 세미나</p>
+            <p className="text-sm font-medium text-blue-900">{seminar.title}</p>
+            <p className="text-xs text-blue-600 mt-1">
+              📅 {new Date(seminar.start_at).toLocaleString('ko-KR')} | 📍 {seminar.venue}
+            </p>
+          </div>
+        ) : (
+          <div className="bg-gray-50 rounded-2xl p-5 mb-6 border">
+            <p className="text-xs text-gray-400">세미나 정보 불러오는 중...</p>
+          </div>
+        )}
         <div className="bg-white rounded-2xl border p-6">
           <h1 className="text-lg font-medium mb-6">참석 신청</h1>
           {error && <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl mb-4">{error}</div>}
