@@ -25,10 +25,8 @@ export default function Home() {
           rel="noreferrer"
           className="flex items-center gap-4 bg-white border border-red-100 rounded-2xl p-5 hover:border-red-300 transition-all"
         >
-          <div className="w-12 h-12 bg-red-600 rounded-xl flex items-center justify-center flex-shrink-0">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-              <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/>
-            </svg>
+          <div className="w-12 h-12 bg-red-600 rounded-xl flex items-center justify-center flex-shrink-0 text-white text-xl font-bold">
+            ▶
           </div>
           <div className="flex-1">
             <p className="text-sm font-medium text-gray-900">[30초 정책연구] 숏츠</p>
