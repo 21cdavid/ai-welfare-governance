@@ -7,7 +7,6 @@ export default function Home() {
         <span className="font-medium text-blue-700">AI 복지 거버넌스</span>
         <div className="flex gap-4 text-sm">
           <Link href="/seminars" className="hover:text-blue-700">세미나</Link>
-          <Link href="/experts" className="hover:text-blue-700">전문가 풀</Link>
         </div>
       </nav>
       <div className="max-w-4xl mx-auto px-6 py-12">
@@ -17,7 +16,6 @@ export default function Home() {
         </div>
         <div className="flex gap-4 mb-6">
           <Link href="/seminars" className="flex-1 bg-blue-700 text-white text-center py-3 rounded-xl text-sm">세미나 바로가기</Link>
-          <Link href="/experts" className="flex-1 bg-white border text-gray-700 text-center py-3 rounded-xl text-sm">전문가 풀 바로가기</Link>
         </div>
         <YoutubeBanner />
       </div>

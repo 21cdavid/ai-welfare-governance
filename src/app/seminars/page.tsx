@@ -43,7 +43,6 @@ export default async function SeminarsPage() {
         <Link href="/" className="font-medium text-blue-700">AI 복지 거버넌스</Link>
         <div className="flex gap-4 text-sm">
           <Link href="/seminars" className="text-blue-700 font-medium">세미나</Link>
-          <Link href="/experts" className="text-gray-600 hover:text-blue-700">전문가 풀</Link>
         </div>
       </nav>
       <div className="max-w-4xl mx-auto px-6 py-10">
