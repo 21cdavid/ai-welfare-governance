@@ -16,7 +16,7 @@ export default function Home() {
         </div>
         <div className="flex gap-4 mb-6">
           <Link href="/seminars" className="flex-1 bg-blue-700 text-white text-center py-3 rounded-xl text-sm">세미나 바로가기</Link>
-          <a href="https://ggwf.gg.go.kr/archives/category/publish/policy_research" target="_blank" rel="noreferrer" className="flex-1 bg-white border border-blue-200 text-blue-700 text-center py-3 rounded-xl text-sm">정책연구 컨텐츠 바로가기</a>
+          <a href="https://ggwf.gg.go.kr/archives/category/publish/policy_research" target="_blank" rel="noreferrer" className="flex-1 bg-purple-100 border border-purple-200 text-purple-700 text-center py-3 rounded-xl text-sm">정책연구 컨텐츠 바로가기</a>
         </div>
         <YoutubeBanner />
       </div>
