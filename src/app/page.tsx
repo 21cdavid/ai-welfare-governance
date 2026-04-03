@@ -19,8 +19,49 @@ export default function Home() {
           <a href="https://ggwf.gg.go.kr/archives/category/publish/policy_research" target="_blank" rel="noreferrer" className="flex-1 bg-purple-100 border border-purple-200 text-purple-700 text-center py-3 rounded-xl text-sm">정책연구 컨텐츠 바로가기</a>
         </div>
         <YoutubeBanner />
+        <div className="grid grid-cols-3 gap-3 mt-3">
+          <SocialLink
+            href="https://www.facebook.com/ggwelfare"
+            label="페이스북"
+            color="bg-blue-600"
+            abbr="f"
+          />
+          <SocialLink
+            href="https://pf.kakao.com/_UfSxnK"
+            label="카카오채널"
+            color="bg-yellow-400"
+            textColor="text-gray-900"
+            abbr="k"
+          />
+          <SocialLink
+            href="https://www.instagram.com/ggwf_official/"
+            label="인스타그램"
+            color="bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400"
+            abbr="ig"
+          />
+        </div>
       </div>
     </main>
+  )
+}
+
+function SocialLink({ href, label, color, textColor = 'text-white', abbr }: {
+  href: string
+  label: string
+  color: string
+  textColor?: string
+  abbr: string
+}) {
+  return (
+    <a href={href} target="_blank" rel="noreferrer" className="flex items-center gap-3 bg-white border border-gray-100 rounded-2xl p-4 hover:shadow-sm transition-shadow">
+      <div className={`w-9 h-9 ${color} rounded-lg flex items-center justify-center flex-shrink-0 ${textColor} font-bold text-sm`}>
+        {abbr}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-medium text-gray-900 truncate">{label}</p>
+        <p className="text-xs text-gray-400">경기복지재단</p>
+      </div>
+    </a>
   )
 }
 
