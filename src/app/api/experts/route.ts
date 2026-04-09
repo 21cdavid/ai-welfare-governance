@@ -6,12 +6,13 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-export async function GET() {
-  const { data, error } = await supabase
-    .from('experts')
-    .select('*')
-    .eq('status', 'approved')
-    .order('created_at', { ascending: false })
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url)
+  const status = searchParams.get('status')
+  let query = supabase.from('experts').select('*').order('created_at', { ascending: false })
+  if (status) query = query.eq('status', status)
+  else query = query.eq('status', 'approved')
+  const { data, error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json(data)
 }
