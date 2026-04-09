@@ -33,6 +33,11 @@ export default async function SeminarsPage() {
   const seminarsWithFiles = await Promise.all(
     seminars.map(async (s) => ({ ...s, files: await getSeminarFiles(s.id) }))
   )
+  seminarsWithFiles.sort((a, b) => {
+    const score = (s: any) => s.status === 'closed' ? 1 : 0
+    if (score(a) !== score(b)) return score(a) - score(b)
+    return new Date(a.start_at).getTime() - new Date(b.start_at).getTime()
+  })
 
   const statusLabel = { open: '접수 중', upcoming: '예정', closed: '종료' }
   const statusColor = { open: 'bg-green-100 text-green-700', upcoming: 'bg-blue-100 text-blue-700', closed: 'bg-gray-100 text-gray-500' }

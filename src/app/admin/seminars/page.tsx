@@ -29,7 +29,13 @@ export default function AdminSeminarsPage() {
     setLoading(true)
     const res = await fetch('/api/seminars')
     const data = await res.json()
-    setSeminars(Array.isArray(data) ? data : [])
+    const list = Array.isArray(data) ? data : []
+    list.sort((a: any, b: any) => {
+      const score = (s: any) => s.status === 'closed' ? 1 : 0
+      if (score(a) !== score(b)) return score(a) - score(b)
+      return new Date(a.start_at).getTime() - new Date(b.start_at).getTime()
+    })
+    setSeminars(list)
     setLoading(false)
   }
 
