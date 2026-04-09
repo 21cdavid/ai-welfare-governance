@@ -47,8 +47,9 @@ export default function AdminSeminarsPage() {
 
   const openEdit = (s: any) => {
     const dt = new Date(s.start_at)
-    const date = dt.toISOString().slice(0, 10)
-    const time = dt.toTimeString().slice(0, 5)
+    const kst = dt.toLocaleString('sv-SE', { timeZone: 'Asia/Seoul' }) // "YYYY-MM-DD HH:MM:SS"
+    const date = kst.slice(0, 10)
+    const time = kst.slice(11, 16)
     setEditTarget(s)
     setForm({
       title: s.title || '',
@@ -156,7 +157,7 @@ export default function AdminSeminarsPage() {
                   </div>
                   <h2 className="text-base font-medium mb-1">{s.title}</h2>
                   <p className="text-xs text-gray-500">
-                    📅 {new Date(s.start_at).toLocaleString('ko-KR')} &nbsp;|&nbsp;
+                    📅 {new Date(s.start_at).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })} &nbsp;|&nbsp;
                     📍 {s.venue} &nbsp;|&nbsp;
                     👤 {s.organizer}
                   </p>

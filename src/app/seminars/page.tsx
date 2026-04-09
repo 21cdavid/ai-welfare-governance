@@ -60,7 +60,7 @@ export default async function SeminarsPage() {
               </div>
               <h2 className="text-base font-medium mb-3">{s.title}</h2>
               <div className="text-sm text-gray-500 space-y-1 mb-4">
-                <p>📅 {new Date(s.start_at).toLocaleString('ko-KR')}</p>
+                <p>📅 {new Date(s.start_at).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })}</p>
                 <p>📍 {s.venue}</p>
                 <p>👤 주관: {s.organizer}</p>
               </div>

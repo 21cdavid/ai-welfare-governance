@@ -78,7 +78,7 @@ export default function RegisterPage() {
             <p className="text-xs text-blue-600 font-medium mb-1">신청 세미나</p>
             <p className="text-sm font-medium text-blue-900">{seminar.title}</p>
             <p className="text-xs text-blue-600 mt-1">
-              📅 {new Date(seminar.start_at).toLocaleString('ko-KR')} | 📍 {seminar.venue}
+              📅 {new Date(seminar.start_at).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })} | 📍 {seminar.venue}
             </p>
           </div>
         ) : (
