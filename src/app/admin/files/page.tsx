@@ -44,51 +44,63 @@ export default function AdminFilesPage() {
     setMessage('')
     try {
       // 1단계: presigned upload URL 발급
+      setMessage('⏳ 업로드 준비 중...')
       const presignRes = await fetch('/api/files', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fileName: file.name, seminarId }),
       })
-      const presignData = await presignRes.json()
+      let presignData: any = {}
+      try { presignData = await presignRes.json() } catch { presignData = {} }
       if (!presignRes.ok) {
-        setMessage('✗ 업로드 준비 실패: ' + (presignData.error || ''))
+        setMessage('✗ [1단계] URL 발급 실패 (HTTP ' + presignRes.status + '): ' + (presignData.error || '응답 없음'))
+        setUploading(false)
+        e.target.value = ''
+        return
+      }
+      if (!presignData.signedUrl) {
+        setMessage('✗ [1단계] signedUrl 없음: ' + JSON.stringify(presignData))
         setUploading(false)
         e.target.value = ''
         return
       }
 
-      // 2단계: 브라우저에서 Supabase Storage로 직접 업로드 (파일 크기 제한 없음)
+      // 2단계: 브라우저에서 Supabase Storage로 직접 업로드
+      setMessage('⏳ 파일 업로드 중... (' + (file.size / 1024 / 1024).toFixed(1) + 'MB)')
       const uploadRes = await fetch(presignData.signedUrl, {
         method: 'PUT',
         headers: { 'Content-Type': file.type || 'application/octet-stream' },
         body: file,
       })
       if (!uploadRes.ok) {
-        setMessage('✗ 파일 업로드 실패 (HTTP ' + uploadRes.status + ')')
+        const uploadErr = await uploadRes.text().catch(() => '')
+        setMessage('✗ [2단계] 스토리지 업로드 실패 (HTTP ' + uploadRes.status + '): ' + uploadErr.substring(0, 100))
         setUploading(false)
         e.target.value = ''
         return
       }
 
       // 3단계: DB에 메타데이터 저장
+      setMessage('⏳ 정보 저장 중...')
       const registerRes = await fetch('/api/files', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fileName: file.name, filePath: presignData.path, fileType, seminarId }),
       })
-      const registerData = await registerRes.json()
+      let registerData: any = {}
+      try { registerData = await registerRes.json() } catch { registerData = {} }
       if (registerRes.ok) {
         setMessage('✓ 업로드 완료: ' + file.name)
         fetchFiles()
       } else {
-        setMessage('✗ 정보 저장 실패: ' + (registerData.error || ''))
+        setMessage('✗ [3단계] DB 저장 실패 (HTTP ' + registerRes.status + '): ' + (registerData.error || ''))
       }
     } catch (err: any) {
-      setMessage('✗ 오류가 발생했습니다: ' + err.message)
+      setMessage('✗ 예외 발생: ' + (err.message || String(err)))
     }
     setUploading(false)
     e.target.value = ''
-    setTimeout(() => setMessage(''), 5000)
+    setTimeout(() => setMessage(''), 10000)
   }
 
   const handleDownload = async (filePath: string, fileName: string) => {
