@@ -42,25 +42,53 @@ export default function AdminFilesPage() {
     if (!file) return
     setUploading(true)
     setMessage('')
-    const fd = new FormData()
-    fd.append('file', file)
-    fd.append('file_type', fileType)
-    if (seminarId) fd.append('seminar_id', seminarId)
     try {
-      const res = await fetch('/api/files', { method: 'POST', body: fd })
-      const data = await res.json()
-      if (res.ok) {
+      // 1단계: presigned upload URL 발급
+      const presignRes = await fetch('/api/files', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileName: file.name, seminarId }),
+      })
+      const presignData = await presignRes.json()
+      if (!presignRes.ok) {
+        setMessage('✗ 업로드 준비 실패: ' + (presignData.error || ''))
+        setUploading(false)
+        e.target.value = ''
+        return
+      }
+
+      // 2단계: 브라우저에서 Supabase Storage로 직접 업로드 (파일 크기 제한 없음)
+      const uploadRes = await fetch(presignData.signedUrl, {
+        method: 'PUT',
+        headers: { 'Content-Type': file.type || 'application/octet-stream' },
+        body: file,
+      })
+      if (!uploadRes.ok) {
+        setMessage('✗ 파일 업로드 실패 (HTTP ' + uploadRes.status + ')')
+        setUploading(false)
+        e.target.value = ''
+        return
+      }
+
+      // 3단계: DB에 메타데이터 저장
+      const registerRes = await fetch('/api/files', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileName: file.name, filePath: presignData.path, fileType, seminarId }),
+      })
+      const registerData = await registerRes.json()
+      if (registerRes.ok) {
         setMessage('✓ 업로드 완료: ' + file.name)
         fetchFiles()
       } else {
-        setMessage('✗ 업로드 실패: ' + (data.error || ''))
+        setMessage('✗ 정보 저장 실패: ' + (registerData.error || ''))
       }
-    } catch {
-      setMessage('✗ 오류가 발생했습니다.')
+    } catch (err: any) {
+      setMessage('✗ 오류가 발생했습니다: ' + err.message)
     }
     setUploading(false)
     e.target.value = ''
-    setTimeout(() => setMessage(''), 4000)
+    setTimeout(() => setMessage(''), 5000)
   }
 
   const handleDownload = async (filePath: string, fileName: string) => {
@@ -144,7 +172,7 @@ export default function AdminFilesPage() {
                 {uploading ? '업로드 중...' : '📁 파일 선택'}
                 <input
                   type="file"
-                  accept=".pdf,.pptx,.docx,.xlsx,.hwp"
+                  accept=".pdf,.pptx,.ppt,.docx,.doc,.xlsx,.xls,.hwp,.hwpx,.zip,.txt,.csv,.png,.jpg,.jpeg"
                   onChange={handleFileChange}
                   disabled={uploading}
                   className="hidden"
