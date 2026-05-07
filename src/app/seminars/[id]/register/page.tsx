@@ -161,8 +161,8 @@ export default function RegisterPage() {
                         <tbody>
                           <tr>
                             <td className="border border-gray-200 px-2 py-1.5">성명, 소속 기관, 직위, 이메일, 연락처</td>
-                            <td className="border border-gray-200 px-2 py-1.5">세미나 참석 신청 및 운영 관리</td>
-                            <td className="border border-gray-200 px-2 py-1.5">세미나 종료 후 1년</td>
+                            <td className="border border-gray-200 px-2 py-1.5">세미나 참석 신청, 운영 관리 및 후속 행사 안내</td>
+                            <td className="border border-gray-200 px-2 py-1.5">세미나 종료 후 1년 이내 파기</td>
                           </tr>
                         </tbody>
                       </table>
